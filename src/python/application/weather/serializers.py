@@ -1,0 +1,57 @@
+import logging
+from enum import Enum
+
+from rest_framework import serializers
+
+from src.python.application.weather.utils import UnitType, LanguageType
+
+logger = logging.getLogger(__name__)
+
+
+class BaseSerializer(serializers.Serializer):
+    """Base Serializer for all Serializer implementations."""
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
+
+class QuerySerializer(BaseSerializer):
+    """Base Serializer for all QuerySerializer implementations."""
+
+
+class EnumField(serializers.ChoiceField):
+    """A choice field that uses an enum as the possible values"""
+
+    def __init__(self, **kwds):
+        self.enum = kwds.pop('enum', None)
+        if not self.enum:
+            logger.error('You must pass a value for `enum`.')
+            raise ValueError('You must pass a value for `enum`.')
+        if not issubclass(self.enum, Enum):
+            logger.error('The value passed for `enum` is not an Enum')
+            raise ValueError('The value passed for `enum` is not an Enum')
+        choices = [(entry, entry.name) for entry in self.enum]
+
+        super().__init__(choices, **kwds)
+
+    def to_internal_value(self, data):
+        return self.enum(data)
+
+    def to_representation(self, value):
+        return value.value
+
+
+class WeatherQuerySerializer(QuerySerializer):
+    """Query serializer for the weather view."""
+
+    lat = serializers.FloatField(help_text='Latitude number to retrieve weather data.', min_value=-90, max_value=90,
+                                 required=True)
+    lon = serializers.FloatField(help_text='Longitude number to retrieve weather data.', min_value=-180, max_value=180,
+                                 required=True)
+    units = EnumField(help_text='Unit type for the weather data.', required=False, enum=UnitType,
+                      default=UnitType.METRIC)
+    lang = EnumField(help_text='Language type for the weather data.', required=False, enum=LanguageType,
+                     default=LanguageType.ENGLISH)
