@@ -39,8 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'drf_yasg',
+    'rest_framework',
     'weather.apps.WeatherConfig',
 ]
 
@@ -136,66 +136,3 @@ DATA_ACCESS_URL = env.str('URL', 'https://api.openweathermap.org/data/2.5/weathe
 API_KEY = env.str('API_KEY')
 
 # Gets logger level
-LOG_LEVEL = env.str('LOG_LEVEL', 'debug').upper()
-
-console_log = {
-    'handlers': ['console', ],
-    'propagate': False,
-    'level': LOG_LEVEL,
-}
-console_app_log = {
-    'handlers': ['console_app', ],
-    'propagate': False,
-    'level': LOG_LEVEL,
-}
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
-        }
-    },
-    'formatters': {
-        'request_format': {
-            'format': '| %(asctime)s | %(name)-28s | %(levelname)-8s | %(process)d | %(thread)d |  %(message)s',
-        },
-    },
-    'handlers': {
-        'console': {
-            'level': LOG_LEVEL,
-            'filters': ['require_debug_true'],
-            'class': 'logging.StreamHandler',
-            'formatter': 'request_format',
-        },
-        'console_app': {
-            'level': LOG_LEVEL,
-            'class': 'logging.StreamHandler',
-            'formatter': 'request_format',
-        },
-        'production': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'daphne': {
-            'handlers': ['production'],
-            'level': LOG_LEVEL,
-        },
-        'django': console_log,
-        'uvicorn.error': {
-            'handlers': ['production'],
-            'level': LOG_LEVEL,
-        },
-        'django.db.backends': console_log,
-        'django.request': console_log,
-        'commands': console_log,
-
-        'application.api': console_app_log,
-        'application.weather': console_app_log,
-    },
-}

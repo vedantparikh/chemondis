@@ -1,4 +1,5 @@
 from enum import Enum, unique
+from typing import Optional
 
 
 class BaseEnum(str, Enum):
@@ -21,6 +22,7 @@ class UnitType(BaseEnum):
 
     IMPERIAL = 'imperial'
 
+
 @unique
 class LanguageType(BaseEnum):
     """Contains different types of languages."""
@@ -30,3 +32,13 @@ class LanguageType(BaseEnum):
     GERMAN = 'de'
 
     ITALIAN = 'it'
+
+
+def get_cardinal_direction(degree: Optional[int]) -> Optional[str]:
+    """Returns the cardinal direction name based on the degree."""
+
+    if not degree:
+        return None
+    directions = ['North', 'Northeast', 'East', 'Southeast', 'South', 'Southwest', 'West', 'Northwest', 'North']
+    index = round(degree / 45) % 8
+    return directions[index]

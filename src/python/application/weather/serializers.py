@@ -3,7 +3,7 @@ from enum import Enum
 
 from rest_framework import serializers
 
-from src.python.application.weather.utils import UnitType, LanguageType
+from weather.utils import UnitType, LanguageType
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +47,24 @@ class EnumField(serializers.ChoiceField):
 class WeatherQuerySerializer(QuerySerializer):
     """Query serializer for the weather view."""
 
-    lat = serializers.FloatField(help_text='Latitude number to retrieve weather data.', min_value=-90, max_value=90,
+    lat = serializers.FloatField(help_text='Latitude to retrieve weather data.', min_value=-90, max_value=90,
                                  required=True)
-    lon = serializers.FloatField(help_text='Longitude number to retrieve weather data.', min_value=-180, max_value=180,
+    lon = serializers.FloatField(help_text='Longitude to retrieve weather data.', min_value=-180, max_value=180,
                                  required=True)
     units = EnumField(help_text='Unit type for the weather data.', required=False, enum=UnitType,
                       default=UnitType.METRIC)
     lang = EnumField(help_text='Language type for the weather data.', required=False, enum=LanguageType,
                      default=LanguageType.ENGLISH)
+
+
+class WeatherSerializer(BaseSerializer):
+    city_name = serializers.CharField(help_text='Name of the city.', required=False)
+    temperature = serializers.FloatField(help_text='Current temperature in the city.', required=False)
+    min_temperature = serializers.FloatField(help_text='Current day minimum temperature in the city.', required=False)
+    max_temperature = serializers.FloatField(help_text='Current day maximum temperature in the city.', required=False)
+    humidity = serializers.IntegerField(help_text='Current day humidity in the city.', required=False)
+    pressure = serializers.IntegerField(help_text='Current day atmospheric pressure in the city.', required=False)
+    wind_speed = serializers.FloatField(help_text='Current day wind speed in the city.', required=False)
+    direction = serializers.CharField(help_text='Current day wind direction in the city.', required=False)
+    description = serializers.CharField(help_text='Current day weather description in the city.', required=False)
+
