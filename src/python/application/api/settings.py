@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import sys
 from pathlib import Path
 from environs import Env
 
@@ -134,3 +134,6 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATA_ACCESS_URL = env.str('URL', 'https://api.openweathermap.org/data/2.5/weather')
 API_KEY = env.str('API_KEY')
+IS_TEST_ENV = False
+if len(sys.argv) > 1 and sys.argv[1] == 'test':
+    IS_TEST_ENV = True

@@ -5,3 +5,5 @@ drf-yasg==1.21.7
 setuptools==69.0.3
 httpx==0.26.0
 django-request-logging==0.7.5
+redis==5.0.1
+fakeredis==2.21.0
