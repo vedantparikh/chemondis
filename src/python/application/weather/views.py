@@ -4,18 +4,26 @@ from django.http import JsonResponse
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 
-from api.settings import DATA_ACCESS_URL, API_KEY
-from weather.serializers import WeatherQuerySerializer, WeatherSerializer
+from api.settings import (
+    DATA_ACCESS_URL,
+    API_KEY,
+)
+from weather.serializers import (
+    WeatherQuerySerializer,
+    WeatherSerializer,
+)
 from weather.utils import get_cardinal_direction
 
 
-class AsyncHttpsView(View):
-    @swagger_auto_schema(
-        query_serializer=WeatherQuerySerializer(),
-        responses={
-        },
-    )
-    async def get(self, request, *args, **kwargs):
+@swagger_auto_schema(
+    query_serializer=WeatherQuerySerializer(),
+    responses={
+        status.HTTP_200_OK: WeatherQuerySerializer(),
+    },
+)
+class AsyncWeatherView(View):
+
+    async def get(self, request, *args, **kwargs) -> JsonResponse:
         # Extract query parameters from the request
         query_serializer = WeatherQuerySerializer(data=request.GET.dict())
         query_serializer.is_valid(raise_exception=True)
@@ -26,7 +34,6 @@ class AsyncHttpsView(View):
         response = await self._fetch_data(query_params)
 
         if response.status_code == status.HTTP_200_OK:
-            # Process the response as needed
             data = response.json()
             processed_data = await self._process_data(data=data)
             serializer = WeatherSerializer(data=processed_data)
@@ -35,10 +42,8 @@ class AsyncHttpsView(View):
 
         return JsonResponse(status=response.status_code, data=response.text)
 
-
-
     @staticmethod
-    async def _fetch_data(query_params):
+    async def _fetch_data(query_params: dict):
         async with httpx.AsyncClient() as client:
             # Make the asynchronous GET request with query parameters
             response = await client.get(DATA_ACCESS_URL, params=query_params)

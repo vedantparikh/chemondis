@@ -1,11 +1,11 @@
-import logging
 from enum import Enum
 
 from rest_framework import serializers
 
-from weather.utils import UnitType, LanguageType
-
-logger = logging.getLogger(__name__)
+from weather.utils import (
+    UnitType,
+    LanguageType,
+)
 
 
 class BaseSerializer(serializers.Serializer):
@@ -28,10 +28,8 @@ class EnumField(serializers.ChoiceField):
     def __init__(self, **kwds):
         self.enum = kwds.pop('enum', None)
         if not self.enum:
-            logger.error('You must pass a value for `enum`.')
             raise ValueError('You must pass a value for `enum`.')
         if not issubclass(self.enum, Enum):
-            logger.error('The value passed for `enum` is not an Enum')
             raise ValueError('The value passed for `enum` is not an Enum')
         choices = [(entry, entry.name) for entry in self.enum]
 
@@ -58,6 +56,8 @@ class WeatherQuerySerializer(QuerySerializer):
 
 
 class WeatherSerializer(BaseSerializer):
+    """Weather Serializer."""
+
     city_name = serializers.CharField(help_text='Name of the city.', required=False)
     temperature = serializers.FloatField(help_text='Current temperature in the city.', required=False)
     min_temperature = serializers.FloatField(help_text='Current day minimum temperature in the city.', required=False)
@@ -67,4 +67,3 @@ class WeatherSerializer(BaseSerializer):
     wind_speed = serializers.FloatField(help_text='Current day wind speed in the city.', required=False)
     direction = serializers.CharField(help_text='Current day wind direction in the city.', required=False)
     description = serializers.CharField(help_text='Current day weather description in the city.', required=False)
-

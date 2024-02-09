@@ -134,5 +134,3 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATA_ACCESS_URL = env.str('URL', 'https://api.openweathermap.org/data/2.5/weather')
 API_KEY = env.str('API_KEY')
-
-# Gets logger level
