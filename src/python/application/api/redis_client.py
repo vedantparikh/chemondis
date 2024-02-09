@@ -52,7 +52,7 @@ class RedisClient(metaclass=SingletonMeta):
             if self.redis is not None:
                 self.redis.close()
 
-    def __init__(self, host: str = 'localhost', port: int = 6379, db: int = 0, connect: bool = False):
+    def __init__(self, host: str = 'localhost', port: int = 6379, db: int = 0):
         self.host = host
         self.port = port
         self.db = db
