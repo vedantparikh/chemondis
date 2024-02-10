@@ -25,7 +25,7 @@ class MyAsyncTestCase(APITestCase):
 
         mock_async_client.return_value.__aenter__.return_value.get.return_value = mock_response
 
-        url = reverse('weather') + f'?lat=40&lon=50'
+        url = reverse('weather') + f'?q=Texarkana'
         client = AsyncClient()
         response = await client.get(url, format='json')
 
@@ -40,17 +40,11 @@ class MyAsyncTestCase(APITestCase):
     async def test_async_weather_view_with_400_bad_request(self, mock_async_client):
         mock_response = mock.MagicMock()
         mock_response.status_code = 400
-        mock_response.text.return_value = 'Bad request'
 
         mock_async_client.return_value.__aenter__.return_value.get.return_value = mock_response
 
-        url = reverse('weather') + f'?lat=40&lon=50'
+        url = reverse('weather') + f'?q=Texarkana'
         client = AsyncClient()
         response = await client.get(url, format='json')
 
-        self.assertEqual(response.status_code, 200)
-        self.assertDictEqual(response, {'city_name': 'Texarkana', 'temperature': 17.87, 'min_temperature': 17.05,
-                                        'max_temperature': 18.47, 'humidity': 74, 'pressure': 1015,
-                                        'wind_speed': 5.14, 'direction': 'South',
-                                        'description': 'overcast clouds'}
-                             )
+        self.assertEqual(response.status_code, 400)

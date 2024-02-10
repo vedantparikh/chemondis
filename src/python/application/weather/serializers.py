@@ -1,6 +1,7 @@
 from enum import Enum
 
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from weather.utils import (
     UnitType,
@@ -49,10 +50,7 @@ class EnumField(serializers.ChoiceField):
 class WeatherQuerySerializer(QuerySerializer):
     """Query serializer for the weather view."""
 
-    lat = serializers.FloatField(help_text='Latitude to retrieve weather data.', min_value=-90, max_value=90,
-                                 required=True)
-    lon = serializers.FloatField(help_text='Longitude to retrieve weather data.', min_value=-180, max_value=180,
-                                 required=True)
+    q = serializers.CharField(help_text='City name, state code and country code divided by comma.', required=True)
     units = EnumField(help_text='Unit type for the weather data.', required=False, enum=UnitType,
                       default=UnitType.METRIC)
     lang = EnumField(help_text='Language type for the weather data.', required=False, enum=LanguageType,

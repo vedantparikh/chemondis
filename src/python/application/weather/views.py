@@ -32,18 +32,20 @@ class AsyncWeatherView(View):
         query_params['appid'] = API_KEY
 
         # Make an asynchronous HTTPS request with query parameters
-        response = await self._fetch_data(query_params)
+        try:
+            response = await self._fetch_data(query_params)
+        except Exception as e:
+            error_message = f'Error making request to API: {str(e)}'
+            return JsonResponse({'status': 'error', 'error_message': error_message})
 
-        if response.status_code == status.HTTP_200_OK:
-            data = response.json()
-            processed_data = await self._process_data(data=data)
-            serializer = WeatherSerializer(data=processed_data)
-            if serializer.is_valid():
-                return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
-            else:
-                return JsonResponse(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = response.json()
+        processed_data = await self._process_data(data=data)
+        serializer = WeatherSerializer(data=processed_data)
+        if serializer.is_valid():
+            return JsonResponse(data=serializer.data, status=status.HTTP_200_OK)
 
-        return JsonResponse(status=response.status_code, data=response.text)
+        return JsonResponse(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     @staticmethod
     async def _fetch_data(query_params: dict):
