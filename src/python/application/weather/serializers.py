@@ -36,7 +36,11 @@ class EnumField(serializers.ChoiceField):
         super().__init__(choices, **kwds)
 
     def to_internal_value(self, data):
-        return self.enum(data)
+        try:
+            return self.enum(data)
+        except ValueError:
+            raise serializers.ValidationError(
+                f'Invalid choice: {data}. Must be one of {", ".join(entry.value for entry in self.enum)}.')
 
     def to_representation(self, value):
         return value.value

@@ -6,9 +6,6 @@ from unittest import mock
 from rest_framework.test import APITestCase
 from django.urls import reverse
 
-from weather.views import AsyncWeatherView
-
-
 data = {'coord': {'lon': -94.04, 'lat': 33.44},
         'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04d'}], 'base': 'stations',
         'main': {'temp': 17.87, 'feels_like': 17.64, 'temp_min': 17.05, 'temp_max': 18.47, 'pressure': 1015,
@@ -20,12 +17,40 @@ data = {'coord': {'lon': -94.04, 'lat': 33.44},
 @override_settings(ROOT_URLCONF='api.urls')
 class MyAsyncTestCase(APITestCase):
 
-    @mock.patch.object(AsyncWeatherView, '_fetch_data')
-    async def test_async_view(self, mock_fetch_data):
-        mock_fetch_data.json().side_effect = data
-        mock_fetch_data.status_code.side_effect = 200
+    @mock.patch('weather.views.httpx.AsyncClient')
+    async def test_async_weather_view_with_200_ok(self, mock_async_client):
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = data
+
+        mock_async_client.return_value.__aenter__.return_value.get.return_value = mock_response
+
         url = reverse('weather') + f'?lat=40&lon=50'
         client = AsyncClient()
         response = await client.get(url, format='json')
 
         self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response.json(), {'city_name': 'Texarkana', 'temperature': 17.87, 'min_temperature': 17.05,
+                                               'max_temperature': 18.47, 'humidity': 74, 'pressure': 1015,
+                                               'wind_speed': 5.14, 'direction': 'South',
+                                               'description': 'overcast clouds'}
+                             )
+
+    @mock.patch('weather.views.httpx.AsyncClient')
+    async def test_async_weather_view_with_400_bad_request(self, mock_async_client):
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 400
+        mock_response.text.return_value = 'Bad request'
+
+        mock_async_client.return_value.__aenter__.return_value.get.return_value = mock_response
+
+        url = reverse('weather') + f'?lat=40&lon=50'
+        client = AsyncClient()
+        response = await client.get(url, format='json')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertDictEqual(response, {'city_name': 'Texarkana', 'temperature': 17.87, 'min_temperature': 17.05,
+                                        'max_temperature': 18.47, 'humidity': 74, 'pressure': 1015,
+                                        'wind_speed': 5.14, 'direction': 'South',
+                                        'description': 'overcast clouds'}
+                             )
