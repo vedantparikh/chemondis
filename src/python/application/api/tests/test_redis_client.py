@@ -13,6 +13,10 @@ class TestRedisClient(TestCase):
         self.redis.set('some_test51_text', 'data5')
         self.redis.set('test25', 'data5')
 
+    def tearDown(self) -> None:
+        self.redis.flush_all()
+
+
     def test_set_method(self):
         self.assertTrue(self.redis.set('test_set1', 'data1'))
         self.assertTrue(self.redis.set('test_set2', 5))

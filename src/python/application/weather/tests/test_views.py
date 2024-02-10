@@ -6,6 +6,8 @@ from unittest import mock
 from rest_framework.test import APITestCase
 from django.urls import reverse
 
+from api.redis_client import get_redis
+
 data = {'coord': {'lon': -94.04, 'lat': 33.44},
         'weather': [{'id': 804, 'main': 'Clouds', 'description': 'overcast clouds', 'icon': '04d'}], 'base': 'stations',
         'main': {'temp': 17.87, 'feels_like': 17.64, 'temp_min': 17.05, 'temp_max': 18.47, 'pressure': 1015,
@@ -15,7 +17,7 @@ data = {'coord': {'lon': -94.04, 'lat': 33.44},
 
 
 @override_settings(ROOT_URLCONF='api.urls')
-class MyAsyncTestCase(APITestCase):
+class TestAsyncWeather(APITestCase):
 
     @mock.patch('weather.views.httpx.AsyncClient')
     async def test_async_weather_view_with_200_ok(self, mock_async_client):
@@ -48,3 +50,29 @@ class MyAsyncTestCase(APITestCase):
         response = await client.get(url, format='json')
 
         self.assertEqual(response.status_code, 400)
+
+
+@override_settings(ROOT_URLCONF='api.urls')
+class TestAsyncWeatherCache(APITestCase):
+
+    def setUp(self) -> None:
+        self.fake_redis = get_redis()
+        super().setUp()
+
+    def tearDown(self) -> None:
+        self.fake_redis.flush_all()
+
+    @mock.patch('weather.views.httpx.AsyncClient')
+    async def test_async_weather_view_with_200_ok_generates_cache(self, mock_async_client):
+        mock_response = mock.MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = data
+
+        mock_async_client.return_value.__aenter__.return_value.get.return_value = mock_response
+
+        url = reverse('weather') + f'?q=Texarkana'
+        client = AsyncClient()
+        _ = await client.get(url, format='json')
+
+        self.assertListEqual(self.fake_redis.get_all_keys(),
+                             ['lang_en_q_Texarkana_units_metric'])
