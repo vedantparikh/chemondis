@@ -3,3 +3,5 @@ environs==10.3.0
 djangorestframework==3.14.0
 drf-yasg==1.21.7
 setuptools==69.0.3
+httpx==0.26.0
+django-request-logging==0.7.5
