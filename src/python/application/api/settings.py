@@ -40,8 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_yasg',
     'rest_framework',
+    'drf_spectacular',
     'weather.apps.WeatherConfig',
 ]
 
@@ -107,11 +107,11 @@ REST_FRAMEWORK = {
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema'
 }
-
-SWAGGER_SETTINGS = {
-    'LOGIN_URL': 'rest_framework:login',
-    'LOGOUT_URL': 'rest_framework:logout'
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Weather App',
+    'VERSION': '1.0.0',
 }
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
@@ -123,6 +123,9 @@ TIME_ZONE = env.str('TIME_ZONE', 'UTC')
 USE_I18N = env.bool('USE_I18N', True)
 
 USE_TZ = env.bool('USE_TZ', True)
+
+# show Swagger and Open api spec endpoint
+SHOW_API_DOCUMENTATION = env.bool('SHOW_API_DOCUMENTATION', True)
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/

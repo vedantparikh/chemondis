@@ -3,7 +3,7 @@ from django.views import View
 from django.http import JsonResponse
 from django.conf import settings
 from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import extend_schema
 
 from api.redis_client import get_redis
 from weather.serializers import (
@@ -16,12 +16,7 @@ from weather.utils import get_cardinal_direction
 class AsyncWeatherView(View):
     redis = get_redis()
 
-    @swagger_auto_schema(
-        query_serializer=WeatherQuerySerializer(),
-        responses={
-            status.HTTP_200_OK: WeatherQuerySerializer(),
-        },
-    )
+    @extend_schema(methods=('GET',), responses=WeatherSerializer, parameters=[WeatherQuerySerializer])
     async def get(self, request, *args, **kwargs) -> JsonResponse:
         # Extract query parameters from the request
         query_serializer = WeatherQuerySerializer(data=request.GET.dict())
@@ -55,7 +50,6 @@ class AsyncWeatherView(View):
             return JsonResponse(data=data, status=response.status_code)
 
         return JsonResponse(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
     @staticmethod
     async def _fetch_data(query_params: dict):

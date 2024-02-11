@@ -1,7 +1,6 @@
 from enum import Enum
 
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from weather.utils import (
     UnitType,
