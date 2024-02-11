@@ -33,8 +33,9 @@ class AsyncWeatherView(View):
         from_redis = self.redis.get(redis_key)
 
         if from_redis:
-            JsonResponse(status=status.HTTP_200_OK, data=from_redis)
+            return JsonResponse(status=status.HTTP_200_OK, data=from_redis)
 
+        # adds api key into query parameter
         query_params['appid'] = settings.API_KEY
 
         # Make an asynchronous HTTPS request with query parameters
@@ -49,8 +50,9 @@ class AsyncWeatherView(View):
         serializer = WeatherSerializer(data=processed_data)
         if serializer.is_valid():
             data = serializer.data
+            # store in redis cache
             self.redis.set(redis_key, data)
-            return JsonResponse(data=data, status=status.HTTP_200_OK)
+            return JsonResponse(data=data, status=response.status_code)
 
         return JsonResponse(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

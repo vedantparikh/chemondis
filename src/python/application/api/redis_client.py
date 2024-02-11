@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 
 import fakeredis
 import redis
-from django.conf import settings
 from environs import Env
+from django.conf import settings
 
 from api.singletonmeta import SingletonMeta
 
@@ -38,8 +38,7 @@ class RedisClient(metaclass=SingletonMeta):
             self.connection_pool = connection_pool
 
         def __enter__(self):
-            self.redis = redis.Redis(
-                connection_pool=self.connection_pool)  # noqa pylint: disable=attribute-defined-outside-init
+            self.redis = redis.Redis(connection_pool=self.connection_pool)
             try:
                 self.redis.ping()
             except redis.ConnectionError:
@@ -59,7 +58,6 @@ class RedisClient(metaclass=SingletonMeta):
         # a global expiry time in seconds for all keys.
         self._env = Env()
         self.ex_seconds = self._env.int('REDIS_TTL_SECONDS', 60 * 60)
-        self.ex_seconds_model = self._env.int('REDIS_TTL_MODEL_SECONDS', 60 * 60)
         self.connection_pool = redis.ConnectionPool(
             host=self.host,
             port=self.port,
@@ -189,7 +187,7 @@ class FakeRedisClient(metaclass=SingletonMeta):
         return res
 
     @ensure_serializable_key
-    def set(self, key, value, ex_seconds=None):
+    def set(self, key, value):
         key = key.strip('"')
         if isinstance(value, MagicMock):
             return True
